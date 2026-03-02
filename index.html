@@ -29,7 +29,7 @@ async function loadTracks() {
   const manifest = await res.json();
 
   for (const item of manifest.items) {
-    const geo = await fetch('./' + item.path);
+    const geo = await fetch(item.path);
     const data = await geo.json();
 
     const layer = L.geoJSON(data).addTo(map);
