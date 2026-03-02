@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>D2D – Parcours équipe</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { height: 100%; }
+    .legend {
+      position: absolute;
+      z-index: 1000;
+      background: white;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 8px;
+      font-family: system-ui;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="legend">
+    <b>Parcours porte-à-porte</b><br/>
+    Cliquez sur un tracé pour voir le nom + date.
+  </div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([45.55, -73.55], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    async function loadAll() {
+      const res = await fetch('./manifest.json', { cache: "no-store" });
+      const manifest = await res.json();
+
+      const layers = [];
+
+      for (const item of manifest.items) {
+        const gj = await (await fetch('./' + item.path, { cache: "no-store" })).json();
+
+        const layer = L.geoJSON(gj, {
+          onEachFeature: (feature, l) => {
+            const name = feature.properties?.name ?? item.name ?? 'Parcours';
+            const date = feature.properties?.date ?? item.date ?? '';
+            l.bindPopup(`<b>${name}</b><br/>${date}`);
+          }
+        }).addTo(map);
+
+        layers.push(layer);
+      }
+
+      if (layers.length > 0) {
+        const group = L.featureGroup(layers);
+        map.fitBounds(group.getBounds().pad(0.1));
+      }
+    }
+
+    loadAll().catch(console.error);
+  </script>
+</body>
+</html>
