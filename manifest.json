@@ -4,6 +4,11 @@
       "path": "data/parcours.geojson",
       "name": "Parcours test",
       "date": "2026-03-02"
+    },
+    {
+      "path": "data/20260302122455-66129-data.geojson",
+      "name": "Marketer",
+      "date": "2026-03-02"
     }
   ]
 }
